@@ -1,0 +1,28 @@
+{
+  "name": "socketio",
+  "version": "1.0.0",
+  "description": "ITPA socketio server",
+  "author": "Leonard Bay<lbay@cs.fiu.edu>",
+  "main": "server.js",
+  "private": true,
+  "gypfile": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.16.1",
+    "serve-index": "1.9.1",
+    "socket.io": "2.1.1",
+    "body-parser": "1.18.3",
+    "bluebird": "3.5.1",
+    "request": "2.87.0",
+    "request-promise": "4.2.2",
+    "redis": "2.8.0",
+    "fs-extra": "7.0.0",
+    "uuid": "3.3.2",
+    "bindings": "1.3.0",
+    "node-addon-api": "1.4.0",
+    "nan": "2.11.0",
+    "cors": "2.8.4"
+  }
+}

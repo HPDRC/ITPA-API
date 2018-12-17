@@ -1,0 +1,53 @@
+FROM python:3.6-alpine
+
+ENV PYTHONUNBUFFERED 1
+MAINTAINER HPDRC
+
+RUN apk update
+RUN apk upgrade
+RUN apk add bash
+RUN apk add binutils
+RUN apk add python3-dev
+RUN apk add libxml2-dev
+RUN apk add libxslt-dev
+#RUN apk add libproj-dev
+#RUN apk add gdal-bin
+RUN apk add libgdal-dev
+RUN apk add python3-gdal
+
+#RUN apk add zlib1g-dev
+
+RUN apk --no-cache add --virtual build-dependencies \
+      build-base \
+      libxml2-dev \
+      libxslt-dev \
+      py-mysqldb \
+      gcc \
+      libc-dev \
+      libffi-dev \
+      mariadb-dev
+
+RUN apk -q --no-cache add mariadb-client-libs
+
+#RUN ln -s /usr/bin/mariadb_config /usr/bin/mysql_config
+
+ENV USER itpa
+
+RUN mkdir -p /usr/src/app
+RUN mkdir -p /usr/src/app/itpa
+WORKDIR /usr/src/app
+
+COPY docker-entrypoint.sh /usr/src/app/
+COPY manage.py /usr/src/app/
+COPY ./itpa/ /usr/src/app/itpa/
+
+COPY requirements.txt /usr/src/app/
+
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir  -r requirements.txt
+
+RUN rm -rf .cache/pip
+RUN apk del build-dependencies
+
+EXPOSE 8060
+ENTRYPOINT ["/bin/bash", "docker-entrypoint.sh"]

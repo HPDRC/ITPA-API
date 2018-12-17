@@ -1,0 +1,6 @@
+celery==4.2.1
+redis==2.10.6
+requests==2.19.1
+mysql-connector-python==8.0.11
+pytz==2018.5
+beautifulsoup4==4.6.3

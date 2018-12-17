@@ -1,0 +1,150 @@
+version: '2'
+
+services:
+
+  video:
+    image: video
+    build: ./video
+    restart: always
+    #ports:
+    #  - "1935:1935"
+    #  - "8080:80"
+    volumes:
+      - streamdata:/data
+    env_file: .env
+
+  nginx:
+    links:
+      - api
+      - itpa
+      - flower
+      - socketio
+    depends_on:
+      - api
+      - itpa
+      - flower
+      - socketio
+    restart: always
+    image: nginx
+    build: ./nginx
+    expose:
+      - "${NGINX_OUT_PORT}"
+      - "${NGINX_OUT_SSL_PORT}"
+    ports:
+      - "${NGINX_OUT_PORT}:80"
+      - "${NGINX_OUT_SSL_PORT}:443"
+    env_file: .env
+
+  cache:
+    restart: always
+    image: redis:alpine
+    command: redis-server --requirepass c207ec17-b12c-49a3-82be-d822ea7b0bb3
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+    env_file: .env
+
+  data:
+    image: busybox:latest
+    volumes:
+      - mysqldata:/var/lib/mysql
+    env_file: .env
+
+  db:
+    restart: always
+    image: db
+    build: ./db
+    volumes_from:
+      - data
+    expose:
+      - "33306"
+    ports:
+      - "33306:3306"
+    env_file: .env
+
+  api:
+    links:
+      - db
+      - cache
+      - itpa
+    #expose:
+    #  - "8000"
+    #ports:
+    #  - "8000:8000"
+    restart: always
+    image: api
+    build: ./api
+    env_file: .env
+
+  flower:
+    restart: always
+    image: flower
+    build: ./flower
+    links:
+      - db
+      - cache
+      - tasks
+    depends_on:
+      - db
+      - cache
+      - tasks
+    #expose:
+    #  - "5555"
+    #ports:
+    #  - "5555:5555"
+    env_file: .env
+
+  tasks:
+    links:
+      - db
+      - cache
+      - api
+    restart: always
+    image: tasks
+    build: ./tasks
+    #expose:
+    #  - "5000"
+    #ports:
+    #  - "5000:5000"
+    env_file: .env
+
+  itpa:
+    links:
+      - db
+      - cache
+    restart: always
+    image: itpa
+    build: ./itpa
+    #expose:
+    #  - "8060"
+    #ports:
+    #  - "8060:8060"
+    env_file: .env
+
+  socketio:
+    links:
+      - cache
+      - api
+      - itpa
+    restart: always
+    image: socketio
+    build: ./socketio
+    #expose:
+    #  - "1337"
+    #ports:
+    #  - "1337:1337"
+    volumes:
+      - videos:/usr/src/app/videos
+    env_file: .env
+
+volumes:
+
+  mysqldata:
+    driver: local
+
+  videos:
+    driver: local
+
+  streamdata:
+    driver: local
